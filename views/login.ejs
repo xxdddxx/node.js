@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.8.18/jquery-ui.min.js"></script>
+</head>
+<body>
+
+<div>
+  <div><span class="id">ID</span><input type="text" id="id" name="login"></div>
+  <div><span class="name">PW</span><input type="text" id="name" name="login"></div>
+  <button onclick="login()">로그인</button>
+</div>
+<script>
+
+  function login() {
+    // input 태그 id가 id인 text에 값을 입력하고 클릭한 값이 id 변수명에 대입
+    var id = $("#id").val();
+
+    // ajax를 이용해서 요청 (통신)
+    // routes 폴더 login.js 파일 내에 url 경로가 /login 이고
+    // type 이 get인 라우터를 찾아서 Controller.js 파일 내에 작성된 지정 경로로 이동
+    // 위에서 대입해준 id값을 "id" 이름으로 전송
+    $.ajax({
+      url: "/login",
+      type: "get",
+      data : {'id':id},
+      success: function (result) {
+        // 원하는 요청이 정상적으로 응답되었다면 /home으로 이동
+        alert(JSON.stringify(id));
+        location.href="/home"
+      },
+      error: function (error) {
+        // 응답이 왔지만 error라면 다시 로그인창으로 이동
+        location.href='/'
+        alert("에러");
+      }
+    });
+  }
+
+
+</script>
+
+</body>
+</html>

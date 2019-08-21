@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.8.18/jquery-ui.min.js"></script>
+</head>
+<body>
+
+<div align="center">
+  <span>리스트(<%= totalCount%>)</span>
+  <table border="1" cellspacing="0" cellpadding="3">
+
+    <tr>
+      <th>no</th>
+      <th>id</th>
+      <th>name</th>
+      <th>nick</th>
+      <th >수정 삭제</th>
+
+    </tr>
+    <% data.forEach(function (item) { %>
+      <tr>
+        <td><%= item.no %></td>
+        <td><a style="color: black"  href="home?id=<%= item.id %>"><%=item.id %></a></td>
+        <td><%= item.name %></td>
+        <td><%= item.nick %></td>
+        <td align="center"><button id="updateId" onclick="updateInfo_pop('<%= item.id%>')">수정</button>
+          <button id="deleteId" onclick="deleteInfo_pop('<%= item.id%>')">삭제</button></td>
+      </tr>
+    <% }); %>
+  </table>
+</div>
+<div align="center">
+  <form name="gogo" id="gogo" action="/" method="post" >
+    <input type="hidden" name="pageNo" id="pageNo" value="<%=pageNo%>">
+  </form>
+  <!-- pageNo가 1이 아니면-->
+  <% if(pageNo != 1) { %>
+  <!-- '<<'를 클릭했을 때 1페이지로 이동-->
+  <span onclick="goPage(1)"> &lt;&lt; </span>
+  <!-- '<'를 클릭했을 때 pageNo-1 적용 -->
+  <span onclick="goPage(<%=parseInt(pageNo)-1%>)"> < </span>
+  <% }else{ %>
+    <!-- pageNo가 1이라면 '<<'와 '<'는 비활성화 -->
+    <span> &lt;&lt; </span>
+    <span> &lt; </span>
+  <% } %>
+  <!-- i=시작페이지; i<마지막페이지+1; i++ -->
+  <% for(var i=startPageNum; i<endPageNum+1; i++) { %>
+    <!-- pageNo가 i라면 -->
+    <% if(i == pageNo) { %>
+    <!-- 현재 페이지 = i -->
+    <span><%=i%></span>
+    <% }else{ %>
+    <!-- 현재 페이지가 아닌 페이지 i를 클릭하면 해당 i 페이지로 이동 -->
+    <span onclick="goPage(<%=i%>)"><%=i%></span>
+    <% }%>
+  <% } %>
+  <!-- pageNo가 출력될 페이지 즉 마지막 페이지가 아니라면 -->
+  <% if(pageNo != numOfPages) { %>
+  <!-- '>'를 클릭하면 +1 페이지로 '>>'를 클릭하면 출력될 페이지 즉 마지막 페이지로 이동 -->
+  <span onclick="goPage(<%=parseInt(pageNo)+1%>)"> &gt; </span>
+  <span onclick="goPage(<%=numOfPages%>)"> &gt;&gt; </span>
+  <% }else{ %>
+    <!-- pageNo == numOfPages 즉 마지막 페이지라면 '>'와 '>>'는 비활성화 -->
+    <span> &gt; </span>
+    <span> &gt;&gt; </span>
+  <% } %>
+</div>
+
+<div style="float: right; margin-right: 20%">
+  <form id="write" name="write" onsubmit="return false">
+    <input type="text" id="id" name="id"><br>
+    <input type="text" id="name" name="name"><br>
+    <input type="text" id="nick" name="nick"><br>
+    <button onclick="writeGo()" style="float: right">등록</button>
+  </form>
+</div>
+
+<!-- 수정 팝업 -->
+<div id="updateInfo_pop" style="display: none;">
+  <form id="updateInfoForm" name="updateInfoForm">
+    <span>정보 수정</span>
+    <table class="pop_table">
+      <tr height="40px;">
+        <th style="width:20%;">id</th>
+        <td><input type="text" id="id_update" name="id_update" disabled></td>
+      </tr>
+      <tr height="40px;">
+        <th style="width:20%;">name</th>
+        <td><input type="text" id="name_update" name="name_update"></td>
+      </tr>
+      <tr height="40px;">
+        <th style="width:20%;">nick</th>
+        <td><input type="text" id="nick_update" name="nick_update"></td>
+      </tr>
+    </table>
+    <div onclick="updateInfo()" style="margin-top: 30px;">수정</div>
+    <div onclick="updateInfo_pop_close()" style="margin-top: 30px;">취소</div>
+  </form>
+</div>
+<!-- 수정 팝업 END -->
+
+<!-- 삭제 팝업 -->
+<div id="deleteInfo_pop" style="display: none;">
+  <input type="hidden" id="deleteId" name="deleteId">
+  <span>정보 삭제</span>
+  <div onclick="deleteInfo()" style="margin-top: 30px;">삭제</div>
+  <div onclick="deleteInfo_pop_close()" style="margin-top: 30px;">취소</div>
+</div>
+<!-- 삭제 팝업 END -->
+
+<!-- 조회 -->
+<div class="contents_wrap clearfix" style="margin-bottom: 30px;">
+  <div class="title_area">
+    <span class="contents_title">조회</span>
+  </div>
+  <table class="leftTable">
+    <tr>
+      <th>아이디</th>
+      <td><textarea id="idSearch" name="idSearch" style="width:90%;" rows="1"></textarea></td>
+      <th>이름</th>
+      <td><textarea id="nameSearch" name="nameSearch" style="width:90%;" rows="1"></textarea></td>
+      <th>닉네임</th>
+      <td><textarea id="nickSearch" name="nickSearch" style="width:90%;" rows="1"></textarea></td>
+    </tr>
+  </table>
+  <div class="btn_blue" style="margin-top: 10px; position:relative; left:50%; width:100px; margin:10px 0 0 -50px;" onclick="searchForm(1);">조회</div>
+</div>
+<!-- 조회 END -->
+
+<script>
+  // 페이징 처리
+  function goPage(pageNo)  {
+    /*alert(pageNo);*/
+    $("#pageNo").val(pageNo);
+    document.gogo.submit();
+  }
+
+  // 조회
+  function searchForm(pageNo) {
+    $("#pageNo").val(pageNo);
+    document.gogo.submit();
+  }
+
+  // 등록하기
+  function writeGo() {
+    var param = $("form[name=write]").serialize();
+
+    var id = $("#id").val();
+    var name =  $("#name").val();
+    var nick = $("#nick").val();
+
+    if(id == "") {
+      alert("공백 안돼");
+      $("#id").focus();
+      return;
+    }
+    if (name == "") {
+      alert("너도 안돼");
+      $("#name").focus();
+      return ;
+    }
+    if(nick == "") {
+      alert("안돼");
+      $("#nick").focus();
+      return;
+    }
+
+    alert("ok " + JSON.stringify(param));
+
+    $.ajax({
+      url: '/home/write',
+      type: 'post',
+      data: param,
+      success: function() {
+        window.location.reload();
+        alert("성공");
+      },
+      error: function () {
+        alert("실패")
+      }
+    });
+  }
+
+  // 수정할 정보 불러오기
+  function updateInfo_pop(id) {
+    alert(id);
+    $.ajax({
+      url:"/home/updateView",
+      type: "get",
+      data: {"id": id},
+      success: function (result) {
+        var id = result['updateViewer'][0].id;
+        var name =result['updateViewer'][0].id;
+        var nick = result['updateViewer'][0].id;
+
+        $("#id_update").val(id);
+        $("#name_update").val(name);
+        $("#nick_update").val(nick);
+        alert("수정할 값 불러오기");
+
+        document.all.updateInfo_pop.style.display="block";
+      },
+      error: function () {
+        alert("실패")
+        return;
+      }
+    });
+  }
+
+  // 수정 팝업 닫기
+  function updateInfo_pop_close() {
+    document.all.updateInfo_pop.style.display="none";
+  }
+
+  // 정보 수정
+  function updateInfo() {
+    var param = $("form[name=updateInfoForm]").serializeArray();
+    var id = $("#id_update").val();
+
+    param.push({name:"id_update", value:id});
+
+    $.ajax({
+      url: "/home/update",
+      type: "put",
+      data: param,
+      success: function(result) {
+        window.location.reload();
+      },
+      error: function() {
+        alert("처리중 에러가 발생하였습니다.");
+        return;
+      }
+    });
+  }
+
+  //  삭제 팝업 열기
+  function deleteInfo_pop(id) {
+    $("#deleteId").val(id);
+    document.all.deleteInfo_pop.style.display="block";
+  }
+
+  //  삭제
+  function deleteInfo() {
+    let id = $("#deleteId").val();
+
+    $.ajax({
+      url: "/home/delete",
+      type: "put",
+      data: {"id":id},
+      success: function(result) {
+        window.location.reload();
+      },
+      error: function() {
+        alert("처리중 에러가 발생하였습니다.");
+        return;
+      }
+    })
+  }
+
+  // 삭제 팝업 닫기
+  function deleteInfo_pop_close() {
+    document.all.deleteInfo_pop.style.display="none";
+  }
+
+</script>
+
+</body>
+</html>
